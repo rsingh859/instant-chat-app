@@ -8,7 +8,16 @@ module.exports = {
       lg: "1200px",
       xl: "1440px",
     },
-    extend: {},
+    extend: {
+      colors: {
+        myBlue: "#6366F1",
+        myPink: "#000000",
+        mySecondary: "#4c4c4c",
+      },
+      backgroundImage: (theme) => ({
+        pattern: "url('/src/assets/bg1.png')",
+      }),
+    },
   },
   plugins: [],
 };
