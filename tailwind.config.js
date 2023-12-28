@@ -14,9 +14,6 @@ module.exports = {
         myPink: "#000000",
         mySecondary: "#4c4c4c",
       },
-      backgroundImage: (theme) => ({
-        pattern: "url('/src/assets/bg1.png')",
-      }),
     },
   },
   plugins: [],
