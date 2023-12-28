@@ -1,16 +1,18 @@
 import React, { useState } from "react";
 import Input from "./Input";
 import Button from "./Button";
+import { BE_signUp } from "../server/Queries";
 
 const Login = () => {
   const [login, setLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [signUpLoading, setSignUpLoading] = useState(false);
 
   const handleSignUp = () => {
     const data = { email, password, confirmPassword };
-    console.log(data);
+    BE_signUp(data, setSignUpLoading);
   };
 
   const handleSignIn = () => {
@@ -51,7 +53,11 @@ const Login = () => {
           </>
         ) : (
           <>
-            <Button text="Register" onClick={handleSignUp} />
+            <Button
+              text="Register"
+              onClick={handleSignUp}
+              loading={signUpLoading}
+            />
             <Button text="Login" secondary onClick={() => setLogin(true)} />
           </>
         )}
