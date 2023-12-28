@@ -7,10 +7,17 @@ import { toastErr } from "../utils/toast";
 import CatchErr from "../utils/catchErr";
 import { authDataType, setLoadingType, userType } from "../Types";
 import { NavigateFunction } from "react-router-dom";
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { defaultUser, setUser } from "../Redux/userSlice";
 import { AppDispatch } from "../Redux/store";
 import ConvertTime from "../utils/convertTime";
+import AvatarGenerator from "../utils/avatarGen";
 
 const usersColl = "users";
 const tasksColl = "tasks";
@@ -33,11 +40,12 @@ export const BE_signUp = (
       createUserWithEmailAndPassword(auth, email, password)
         .then(async ({ user }) => {
           // create user image
+          const imgLink = AvatarGenerator(user.email?.split("@")[0] || "");
           const userInfo = await addUserToCollection(
             user.uid,
             user.email || "",
             user.email?.split("@")[0] || "",
-            "imgLink"
+            imgLink
           );
 
           //set user info to the store and local storage
@@ -70,7 +78,7 @@ export const BE_signIn = (
   signInWithEmailAndPassword(auth, email, password)
     .then(async ({ user }) => {
       // update user isOnline
-
+      await updateUserInfo({ id: user.uid, isOnline: true });
       //getUserInfo
       const userInfo = await getUserInfo(user.uid);
       // set user in store
@@ -86,6 +94,7 @@ export const BE_signIn = (
     });
 };
 
+// add user to collection
 const addUserToCollection = async (
   id: string,
   email: string,
@@ -105,6 +114,7 @@ const addUserToCollection = async (
   return getUserInfo(id);
 };
 
+//get user info
 const getUserInfo = async (id: string): Promise<userType> => {
   const userRef = doc(db, usersColl, id);
   const userSnap = await getDoc(userRef);
@@ -131,4 +141,40 @@ const getUserInfo = async (id: string): Promise<userType> => {
     toastErr("User not found");
     return defaultUser;
   }
+};
+
+// update user info
+const updateUserInfo = async ({
+  id,
+  username,
+  img,
+  isOnline,
+  isOffline,
+}: {
+  id?: string;
+  username?: string;
+  img?: string;
+  isOnline?: boolean;
+  isOffline?: boolean;
+}) => {
+  if (!id) {
+    id = getStorageUser().id;
+  }
+
+  if (id) {
+    // Set the "capital" field of the city 'DC'
+    await updateDoc(doc(db, usersColl, id), {
+      ...(username && { username }),
+      ...(img && { img }),
+      ...(isOnline && { isOnline }),
+      ...(isOffline && { isOnline: false }),
+      lastSeen: serverTimestamp(),
+    });
+  }
+};
+
+const getStorageUser = () => {
+  const user = localStorage.getItem("app_user");
+  if (user) return JSON.parse(user);
+  else return null;
 };

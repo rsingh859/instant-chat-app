@@ -12,6 +12,7 @@ const CatchErr = (err: { code?: string }) => {
   else if (code === "auth/user-not-found") toastErr("User not found");
   else if (code === "auth/requires-recent-login")
     toastInfo("Logout and login before upadting your profile");
+  else if (code === "auth/invalid-credential") toastErr("Invalid credentials");
   console.log(err);
 };
 
