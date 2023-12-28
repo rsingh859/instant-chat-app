@@ -3,6 +3,9 @@ import Input from "./Input";
 import Button from "./Button";
 import { BE_signIn, BE_signUp } from "../server/Queries";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../Redux/store";
+import { authDataType, setLoadingType } from "../Types";
 
 const Login = () => {
   const [login, setLogin] = useState(true);
@@ -12,15 +15,20 @@ const Login = () => {
   const [signUpLoading, setSignUpLoading] = useState(false);
   const [signInLoading, setSignInLoading] = useState(false);
   const routeTo = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleSignUp = () => {
     const data = { email, password, confirmPassword };
-    BE_signUp(data, setSignUpLoading, reset, routeTo);
+    auth(data, BE_signUp, setSignUpLoading);
   };
 
   const handleSignIn = () => {
     const data = { email, password };
-    BE_signIn(data, setSignInLoading, reset, routeTo);
+    auth(data, BE_signIn, setSignInLoading);
+  };
+
+  const auth = (data: authDataType, func: any, setLoading: setLoadingType) => {
+    func(data, setLoading, reset, routeTo, dispatch);
   };
 
   const reset = () => {

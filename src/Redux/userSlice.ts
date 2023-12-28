@@ -12,13 +12,19 @@ export const defaultUser: userType = {
   lastSeen: "",
 };
 
-const initialState = {};
+const initialState = {
+  // user: [],
+  currentUser: defaultUser,
+  // currentSelectedUser: null,
+};
 
 const userSlice = createSlice({
   name: "User",
   initialState,
   reducers: {
-    setUser: (state, action) => {},
+    setUser: (state, action) => {
+      state.currentUser = action.payload;
+    },
     setUsers: (state, action) => {},
   },
 });

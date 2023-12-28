@@ -8,7 +8,9 @@ import CatchErr from "../utils/catchErr";
 import { authDataType, setLoadingType, userType } from "../Types";
 import { NavigateFunction } from "react-router-dom";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
-import { defaultUser } from "../Redux/userSlice";
+import { defaultUser, setUser } from "../Redux/userSlice";
+import { AppDispatch } from "../Redux/store";
+import ConvertTime from "../utils/convertTime";
 
 const usersColl = "users";
 const tasksColl = "tasks";
@@ -20,7 +22,8 @@ export const BE_signUp = (
   data: authDataType,
   setLoading: setLoadingType,
   reset: () => void,
-  routeTo: NavigateFunction
+  routeTo: NavigateFunction,
+  dispatch: AppDispatch
 ) => {
   const { email, password, confirmPassword } = data;
   // loading true
@@ -28,9 +31,9 @@ export const BE_signUp = (
   if (email && password) {
     if (password === confirmPassword) {
       createUserWithEmailAndPassword(auth, email, password)
-        .then(({ user }) => {
+        .then(async ({ user }) => {
           // create user image
-          const userInfo = addUserToCollection(
+          const userInfo = await addUserToCollection(
             user.uid,
             user.email || "",
             user.email?.split("@")[0] || "",
@@ -38,6 +41,7 @@ export const BE_signUp = (
           );
 
           //set user info to the store and local storage
+          dispatch(setUser(userInfo));
           setLoading(false);
           reset();
           routeTo("/dashboard");
@@ -47,10 +51,10 @@ export const BE_signUp = (
           setLoading(false);
         });
     } else {
-      toastErr("Passwords do not match");
+      toastErr("Passwords do not match", setLoading);
     }
   } else {
-    toastErr("Fields cannot be left empty");
+    toastErr("Fields cannot be left empty", setLoading);
   }
 };
 
@@ -58,17 +62,19 @@ export const BE_signIn = (
   data: authDataType,
   setLoading: setLoadingType,
   reset: () => void,
-  routeTo: NavigateFunction
+  routeTo: NavigateFunction,
+  dispatch: AppDispatch
 ) => {
   const { email, password } = data;
   setLoading(true);
   signInWithEmailAndPassword(auth, email, password)
-    .then(({ user }) => {
+    .then(async ({ user }) => {
       // update user isOnline
 
       //getUserInfo
-      const userInfo = getUserInfo(user.uid);
+      const userInfo = await getUserInfo(user.uid);
       // set user in store
+      dispatch(setUser(userInfo));
 
       setLoading(false);
       reset();
@@ -114,8 +120,12 @@ const getUserInfo = async (id: string): Promise<userType> => {
       username,
       email,
       bio,
-      creationTime,
-      lastSeen,
+      creationTime: creationTime
+        ? ConvertTime(creationTime.toDate())
+        : "no date yet: userinfo",
+      lastSeen: lastSeen
+        ? ConvertTime(lastSeen.toDate())
+        : "no date yet: userinfo",
     };
   } else {
     toastErr("User not found");
