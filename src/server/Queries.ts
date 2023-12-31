@@ -1,6 +1,7 @@
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signOut,
 } from "firebase/auth";
 import { auth, db } from "./Firebase";
 import { toastErr } from "../utils/toast";
@@ -25,6 +26,7 @@ const taskListColl = "taskList";
 const chatsColl = "chats";
 const messagesColl = "messages";
 
+// register or sing up a user
 export const BE_signUp = (
   data: authDataType,
   setLoading: setLoadingType,
@@ -66,6 +68,7 @@ export const BE_signUp = (
   }
 };
 
+// exisiting user login
 export const BE_signIn = (
   data: authDataType,
   setLoading: setLoadingType,
@@ -92,6 +95,31 @@ export const BE_signIn = (
       CatchErr(err);
       setLoading(false);
     });
+};
+
+//signout the user
+export const BE_signOut = async (
+  dispatch: AppDispatch,
+  navigate: NavigateFunction,
+  setLoading: setLoadingType
+) => {
+  setLoading(true);
+  // sign out functionality from firebase
+  await signOut(auth)
+    .then(async () => {
+      // navigate to auth page instantly
+      navigate("/auth");
+      // set user offline
+      await updateUserInfo({ isOffline: true });
+
+      // set current user to empty
+      dispatch(setUser(defaultUser));
+
+      //remove from local storage
+      localStorage.removeItem("app_user");
+      setLoading(false);
+    })
+    .catch((err) => CatchErr(err));
 };
 
 // add user to collection
@@ -172,8 +200,8 @@ const updateUserInfo = async ({
     });
   }
 };
-
-const getStorageUser = () => {
+//get user from local storage
+export const getStorageUser = () => {
   const user = localStorage.getItem("app_user");
   if (user) return JSON.parse(user);
   else return null;
