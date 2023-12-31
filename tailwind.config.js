@@ -10,9 +10,14 @@ module.exports = {
     },
     extend: {
       colors: {
-        myBlue: "#6366F1",
+        myBlue: "#5263fa",
         myPink: "#000000",
         mySecondary: "#4c4c4c",
+        myPrimary1: "#2b3699",
+        myPrimary2: "#004e92",
+        mySecondary1: "#2C3E50",
+        mySecondary2: "#000000",
+        hoverColor1: "#080807",
       },
     },
   },

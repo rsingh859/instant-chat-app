@@ -7,6 +7,9 @@ function ListPage({}: Props) {
   return (
     <div className="p-10">
       <SingleTaskList />
+      <SingleTaskList />
+      <SingleTaskList />
+      <SingleTaskList />
     </div>
   );
 }

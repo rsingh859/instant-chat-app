@@ -29,7 +29,7 @@ function Header() {
     } else {
       navigate("/auth");
     }
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     const page = getCurrentPage();
@@ -61,15 +61,30 @@ function Header() {
       />
       <div className="flex flex-row-reverse md:flex-row items-center justify-center gap-5 flex-wrap">
         {getCurrentPage() === "chat" ? (
-          <Icons IconName={FiList} onClick={() => navigationToPage("")} />
+          <Icons
+            IconName={FiList}
+            onClick={() => navigationToPage("")}
+            reduceOpacityOnHover={false}
+            customHoverBg
+            customBgColor
+          />
         ) : getCurrentPage() === "profile" ? (
           <>
             <Icons
               IconName={BsFillChatFill}
               ping={true}
               onClick={() => navigationToPage("chat")}
+              reduceOpacityOnHover={false}
+              customHoverBg
+              customBgColor
             />
-            <Icons IconName={FiList} onClick={() => navigationToPage("")} />
+            <Icons
+              IconName={FiList}
+              onClick={() => navigationToPage("")}
+              reduceOpacityOnHover={false}
+              customHoverBg
+              customBgColor
+            />
           </>
         ) : (
           <>
@@ -78,6 +93,9 @@ function Header() {
               IconName={BsFillChatFill}
               ping={true}
               onClick={() => navigationToPage("chat")}
+              reduceOpacityOnHover={false}
+              customHoverBg
+              customBgColor
             />
           </>
         )}
@@ -91,7 +109,7 @@ function Header() {
               >
                 Profile
               </p>
-              <p
+              <div
                 onClick={() => !logoutLoading && handleSignOut()}
                 className={`hover:bg-gray-200 py-2 px-4 flex items-center gap-4 cursor-pointer ${
                   logoutLoading && "cursor-wait"
@@ -99,7 +117,7 @@ function Header() {
               >
                 Logout
                 {logoutLoading && <Spinner />}
-              </p>
+              </div>
             </ul>
           </div>
         </div>

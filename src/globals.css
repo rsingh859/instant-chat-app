@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .custom-primary-color {
+    @apply bg-gradient-to-r from-myPrimary1 to-myPrimary2 hover:from-hoverColor1 hover:to-myPink;
+  }
+
+  .custom-secondary-color {
+    @apply bg-gradient-to-r from-mySecondary1 to-mySecondary2 hover:from-hoverColor1 hover:to-myPink;
+  }
+  .custom-hover-color {
+    @apply bg-gradient-to-r from-hoverColor1 to-myPink;
+  }
+}

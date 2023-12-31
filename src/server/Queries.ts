@@ -117,6 +117,7 @@ export const BE_signOut = async (
 
       //remove from local storage
       localStorage.removeItem("app_user");
+      localStorage.removeItem("app_page");
       setLoading(false);
     })
     .catch((err) => CatchErr(err));
