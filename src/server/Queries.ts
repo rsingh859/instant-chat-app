@@ -6,19 +6,25 @@ import {
 import { auth, db } from "./Firebase";
 import { toastErr } from "../utils/toast";
 import CatchErr from "../utils/catchErr";
-import { authDataType, setLoadingType, userType } from "../Types";
+import { authDataType, setLoadingType, taskListType, userType } from "../Types";
 import { NavigateFunction } from "react-router-dom";
 import {
+  addDoc,
+  collection,
   doc,
   getDoc,
+  getDocs,
+  query,
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { defaultUser, setUser } from "../Redux/userSlice";
 import { AppDispatch } from "../Redux/store";
 import ConvertTime from "../utils/convertTime";
 import AvatarGenerator from "../utils/avatarGen";
+import { addTaskList, defaultTaskList, setTaskList } from "../Redux/taskSlice";
 
 const usersColl = "users";
 const tasksColl = "tasks";
@@ -107,13 +113,14 @@ export const BE_signOut = async (
   // sign out functionality from firebase
   await signOut(auth)
     .then(async () => {
-      // navigate to auth page instantly
-      navigate("/auth");
       // set user offline
       await updateUserInfo({ isOffline: true });
 
       // set current user to empty
       dispatch(setUser(defaultUser));
+
+      // navigate to auth page instantly
+      navigate("/auth");
 
       //remove from local storage
       localStorage.removeItem("app_user");
@@ -206,4 +213,72 @@ export const getStorageUser = () => {
   const user = localStorage.getItem("app_user");
   if (user) return JSON.parse(user);
   else return null;
+};
+
+// -------------------------------- For task List -------------------------------
+
+// Adding a single task list
+export const BE_addTaskList = async (
+  dispatch: AppDispatch,
+  setLoading: setLoadingType
+) => {
+  setLoading(true);
+  const { title } = defaultTaskList;
+
+  const list = await addDoc(collection(db, taskListColl), {
+    title,
+    userId: getStorageUser().id,
+  });
+
+  const newDocSnap = await getDoc(doc(db, list.path));
+
+  if (newDocSnap.exists()) {
+    const newlyAddedDoc: taskListType = {
+      id: newDocSnap.id,
+      title: newDocSnap.data().title,
+    };
+
+    dispatch(addTaskList(newlyAddedDoc));
+    setLoading(false);
+  } else {
+    toastErr("BE_addTaskList: No such doc");
+    setLoading(false);
+  }
+};
+
+// get all task lists
+export const BE_getTaskList = async (
+  dispatch: AppDispatch,
+  setLoading: setLoadingType
+) => {
+  setLoading(true);
+
+  // get user task list
+  const taskList = await getAllTaskList();
+
+  // get task list from firebase
+  dispatch(setTaskList(taskList));
+  setLoading(false);
+};
+
+// get all task list for current user
+const getAllTaskList = async () => {
+  const q = query(
+    collection(db, taskListColl),
+    where("userId", "==", getStorageUser().id)
+  );
+
+  const taskListSnapshot = await getDocs(q);
+  const taskList: taskListType[] = [];
+  taskListSnapshot.forEach((doc) => {
+    const { title } = doc.data();
+    taskList.push({
+      id: doc.id,
+      title,
+      editMode: false,
+      tasks: [],
+    });
+  });
+
+  return taskList;
 };
