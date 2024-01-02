@@ -53,7 +53,7 @@ function Header() {
   };
 
   return (
-    <div className="flex flex-wrap sm:flex-row gap-5 items-center justify-between bg-gradient-to-r drop-shadow-md from-myBlue to-myPink px-5 py-5 md:py-2 text-white">
+    <div className="flex flex-wrap sm:flex-row gap-5 items-center justify-between bg-gradient-to-r drop-shadow-md from-myBlue to-myPink px-5 py-5 md:py-2 text-white z-10">
       <img
         className="w-[80px] drop-shadow-md cursor-pointer bg-transparent"
         src={logo}
