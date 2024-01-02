@@ -24,7 +24,12 @@ import { defaultUser, setUser } from "../Redux/userSlice";
 import { AppDispatch } from "../Redux/store";
 import ConvertTime from "../utils/convertTime";
 import AvatarGenerator from "../utils/avatarGen";
-import { addTaskList, defaultTaskList, setTaskList } from "../Redux/taskSlice";
+import {
+  addTaskList,
+  defaultTaskList,
+  setTaskList,
+  updateTaskListTitle,
+} from "../Redux/taskSlice";
 
 const usersColl = "users";
 const tasksColl = "tasks";
@@ -259,6 +264,30 @@ export const BE_getTaskList = async (
   // get task list from firebase
   dispatch(setTaskList(taskList));
   setLoading(false);
+};
+
+// update task list title
+export const BE_updateTaskList = async (
+  dispatch: AppDispatch,
+  setLoading: setLoadingType,
+  listId: string,
+  title: string
+) => {
+  setLoading(true);
+
+  await updateDoc(doc(db, taskListColl, listId), { title });
+
+  const updatedTaskList = await getDoc(doc(db, taskListColl, listId));
+
+  setLoading(false);
+
+  // dispatch to save task list
+  dispatch(
+    updateTaskListTitle({
+      id: updatedTaskList.id,
+      ...updatedTaskList.data(),
+    })
+  );
 };
 
 // get all task list for current user
