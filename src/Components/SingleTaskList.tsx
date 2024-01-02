@@ -12,6 +12,7 @@ import { taskListType } from "../Types";
 import { BE_updateTaskList } from "../server/Queries";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../Redux/store";
+import { taskListSwitchEditMode } from "../Redux/taskSlice";
 
 type Props = {
   singleTaskList: taskListType;
@@ -28,7 +29,13 @@ const SingleTaskList = forwardRef(
     const [updateLoading, setUpdateLoading] = useState(false);
 
     const handleSaveTaskListTitle = () => {
-      if (id) BE_updateTaskList(dispatch, setUpdateLoading, id, homeTitle);
+      if (id && homeTitle !== title)
+        BE_updateTaskList(dispatch, setUpdateLoading, id, homeTitle);
+      else dispatch(taskListSwitchEditMode({ id: id, value: false }));
+    };
+
+    const checkEnterKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") handleSaveTaskListTitle();
     };
     return (
       <div className="relative" ref={ref}>
@@ -37,6 +44,7 @@ const SingleTaskList = forwardRef(
             {editMode ? (
               <input
                 value={homeTitle}
+                onKeyDown={checkEnterKey}
                 onChange={(e) => setHomeTitle(e.target.value)}
                 className="flex-1 bg-transparent placeholder-slate-300 px-3 py-1 border-[1px] border-white rounded-md"
               />
@@ -47,7 +55,11 @@ const SingleTaskList = forwardRef(
             <div>
               <Icons
                 IconName={editMode ? MdSave : MdEdit}
-                onClick={() => (editMode ? handleSaveTaskListTitle() : null)}
+                onClick={() =>
+                  editMode
+                    ? handleSaveTaskListTitle()
+                    : dispatch(taskListSwitchEditMode({ id }))
+                }
                 loading={editMode && updateLoading}
               />
               <Icons IconName={MdDelete} />
