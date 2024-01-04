@@ -2,6 +2,9 @@ import React, { forwardRef, useState } from "react";
 import Icons from "./Icons";
 import { MdDelete, MdEdit, MdSave } from "react-icons/md";
 import { taskType } from "../Types";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../Redux/store";
+import { collapseTask } from "../Redux/taskSlice";
 
 type Props = {
   task: taskType;
@@ -13,6 +16,8 @@ const Task = forwardRef(
     const { id, title, description, editMode, collapsed } = task;
     const [homeTitle, setHomeTitle] = useState(title);
     const [homeDescription, setHomeDescription] = useState(description);
+    const dispatch = useDispatch<AppDispatch>();
+
     return (
       <div
         ref={ref}
@@ -27,7 +32,12 @@ const Task = forwardRef(
               placeholder="Task title"
             />
           ) : (
-            <p className="cursor-pointer">{title}</p>
+            <p
+              onClick={() => dispatch(collapseTask({ listId, taskId: id }))}
+              className="cursor-pointer"
+            >
+              {title}
+            </p>
           )}
         </div>
         {!collapsed && (
