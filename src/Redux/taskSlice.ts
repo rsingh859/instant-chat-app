@@ -60,6 +60,30 @@ const taskListSlice = createSlice({
       );
     },
 
+    addTask: (state, action) => {
+      const { listId, newTask } = action.payload;
+
+      const updatedList = state.currentTaskList.map((tl) => {
+        if (tl.id === listId) {
+          // switch current task list edit mode to false if true
+          tl.editMode = false;
+          // switch off edit mode of all other tasks
+          const tasks = tl.tasks?.map((t) => {
+            t.editMode = false;
+            t.collapsed = true;
+            return t;
+          });
+
+          //push new task with edit mode true
+          tasks?.push({ ...newTask, editMode: true, collapsed: false });
+
+          tl.tasks = tasks;
+        }
+        return tl;
+      });
+      state.currentTaskList = updatedList;
+    },
+
     deleteTask: () => {},
   },
 });
@@ -70,5 +94,6 @@ export const {
   updateTaskListTitle,
   taskListSwitchEditMode,
   deleteTaskList,
+  addTask,
 } = taskListSlice.actions;
 export default taskListSlice.reducer;

@@ -9,7 +9,11 @@ import {
 } from "react-icons/md";
 import Tasks from "./Tasks";
 import { taskListType } from "../Types";
-import { BE_deleteTaskList, BE_updateTaskList } from "../server/Queries";
+import {
+  BE_addTask,
+  BE_deleteTaskList,
+  BE_updateTaskList,
+} from "../server/Queries";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../Redux/store";
 import { taskListSwitchEditMode } from "../Redux/taskSlice";
@@ -28,6 +32,7 @@ const SingleTaskList = forwardRef(
     const dispatch = useDispatch<AppDispatch>();
     const [updateLoading, setUpdateLoading] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [addTaskLoading, setAddTaskLoading] = useState(false);
 
     const handleSaveTaskListTitle = () => {
       if (id && homeTitle !== title)
@@ -41,6 +46,10 @@ const SingleTaskList = forwardRef(
 
     const handleDelete = () => {
       if (id && tasks) BE_deleteTaskList(id, tasks, dispatch, setDeleteLoading);
+    };
+
+    const handleAddTask = () => {
+      if (id) BE_addTask(dispatch, id, setAddTaskLoading);
     };
     return (
       <div className="relative" ref={ref}>
@@ -78,11 +87,13 @@ const SingleTaskList = forwardRef(
           {id && <Tasks tasks={tasks || []} listId={id} />}
         </div>
         <Icons
+          onClick={handleAddTask}
           IconName={MdAdd}
           className="absolute -mt-6 -ml-4 p-2 drop-shadow-lg hover:bg-myPink"
           reduceOpacityOnHover={false}
           customBgColor
           customHoverBg
+          loading={addTaskLoading}
         />
       </div>
     );
