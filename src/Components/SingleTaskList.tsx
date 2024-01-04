@@ -9,7 +9,7 @@ import {
 } from "react-icons/md";
 import Tasks from "./Tasks";
 import { taskListType } from "../Types";
-import { BE_updateTaskList } from "../server/Queries";
+import { BE_deleteTaskList, BE_updateTaskList } from "../server/Queries";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../Redux/store";
 import { taskListSwitchEditMode } from "../Redux/taskSlice";
@@ -27,6 +27,7 @@ const SingleTaskList = forwardRef(
     const [homeTitle, setHomeTitle] = useState(title);
     const dispatch = useDispatch<AppDispatch>();
     const [updateLoading, setUpdateLoading] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     const handleSaveTaskListTitle = () => {
       if (id && homeTitle !== title)
@@ -36,6 +37,10 @@ const SingleTaskList = forwardRef(
 
     const checkEnterKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") handleSaveTaskListTitle();
+    };
+
+    const handleDelete = () => {
+      if (id && tasks) BE_deleteTaskList(id, tasks, dispatch, setDeleteLoading);
     };
     return (
       <div className="relative" ref={ref}>
@@ -62,11 +67,15 @@ const SingleTaskList = forwardRef(
                 }
                 loading={editMode && updateLoading}
               />
-              <Icons IconName={MdDelete} />
+              <Icons
+                IconName={MdDelete}
+                onClick={handleDelete}
+                loading={deleteLoading}
+              />
               <Icons IconName={MdKeyboardArrowDown} />
             </div>
           </div>
-          <Tasks />
+          {id && <Tasks tasks={tasks || []} listId={id} />}
         </div>
         <Icons
           IconName={MdAdd}

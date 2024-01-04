@@ -6,11 +6,18 @@ import {
 import { auth, db } from "./Firebase";
 import { toastErr } from "../utils/toast";
 import CatchErr from "../utils/catchErr";
-import { authDataType, setLoadingType, taskListType, userType } from "../Types";
+import {
+  authDataType,
+  setLoadingType,
+  taskListType,
+  taskType,
+  userType,
+} from "../Types";
 import { NavigateFunction } from "react-router-dom";
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -27,6 +34,7 @@ import AvatarGenerator from "../utils/avatarGen";
 import {
   addTaskList,
   defaultTaskList,
+  deleteTaskList,
   setTaskList,
   updateTaskListTitle,
 } from "../Redux/taskSlice";
@@ -290,6 +298,33 @@ export const BE_updateTaskList = async (
   );
 };
 
+// dleete task list
+
+export const BE_deleteTaskList = async (
+  listId: string,
+  tasks: taskType[],
+  dispatch: AppDispatch,
+  setLoading: setLoadingType
+) => {
+  setLoading(true);
+  if (tasks.length > 0) {
+    for (let i = 0; i < tasks.length; i++) {
+      const { id } = tasks[i];
+      if (id) BE_deleteTask(listId, id, dispatch);
+    }
+  }
+
+  await deleteDoc(doc(db, taskListColl, listId));
+
+  const deletdTaskList = await getDoc(doc(db, taskListColl, listId));
+
+  if (!deletdTaskList.exists()) {
+    setLoading(false);
+    //dispatch delete task list
+    dispatch(deleteTaskList(listId));
+  }
+};
+
 // get all task list for current user
 const getAllTaskList = async () => {
   const q = query(
@@ -310,4 +345,26 @@ const getAllTaskList = async () => {
   });
 
   return taskList;
+};
+
+// ---------------------------- FOR TASK ------------------------------
+
+export const BE_deleteTask = async (
+  listId: string,
+  id: string,
+  dispatch: AppDispatch,
+  setLoading?: setLoadingType
+) => {
+  if (setLoading) setLoading(true);
+  //
+  const taskRef = doc(db, taskListColl, listId, tasksColl, id);
+
+  await deleteDoc(taskRef);
+
+  const deletedTask = await getDoc(taskRef);
+
+  if (!deletedTask.exists()) {
+    if (setLoading) setLoading(false);
+    //dispatch delete task
+  }
 };
