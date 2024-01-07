@@ -4,7 +4,8 @@ import { MdDelete, MdEdit, MdSave } from "react-icons/md";
 import { taskType } from "../Types";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../Redux/store";
-import { collapseTask } from "../Redux/taskSlice";
+import { collapseTask, taskSwitchEditMode } from "../Redux/taskSlice";
+import { BE_saveUpdatedTask } from "../server/Queries";
 
 type Props = {
   task: taskType;
@@ -16,7 +17,20 @@ const Task = forwardRef(
     const { id, title, description, editMode, collapsed } = task;
     const [homeTitle, setHomeTitle] = useState(title);
     const [homeDescription, setHomeDescription] = useState(description);
+    const [updateTaskLoading, setUpdateTaskLoading] = useState(false);
     const dispatch = useDispatch<AppDispatch>();
+
+    const handleSaveTask = () => {
+      const taskData: taskType = {
+        id,
+        title: homeTitle,
+        description: homeDescription,
+      };
+      // call the save function
+      BE_saveUpdatedTask(dispatch, listId, taskData, setUpdateTaskLoading);
+    };
+
+    const handleDeleteSingleTask = () => {};
 
     return (
       <div
@@ -33,7 +47,7 @@ const Task = forwardRef(
             />
           ) : (
             <p
-              onClick={() => dispatch(collapseTask({ listId, taskId: id }))}
+              onClick={() => dispatch(collapseTask({ listId, id }))}
               className="cursor-pointer"
             >
               {title}
@@ -58,8 +72,16 @@ const Task = forwardRef(
               )}
 
               <div className="flex justify-end">
-                <Icons IconName={editMode ? MdSave : MdEdit} />
-                <Icons IconName={MdDelete} />
+                <Icons
+                  onClick={() =>
+                    editMode
+                      ? handleSaveTask()
+                      : dispatch(taskSwitchEditMode({ listId, id }))
+                  }
+                  IconName={editMode ? MdSave : MdEdit}
+                  loading={editMode && updateTaskLoading}
+                />
+                <Icons IconName={MdDelete} onClick={handleDeleteSingleTask} />
               </div>
             </div>
           </div>

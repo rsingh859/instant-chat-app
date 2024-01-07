@@ -30,7 +30,7 @@ function ListPage({}: Props) {
       ) : (
         <FlipMove className="flex flex-wrap justify-center gap-10">
           {taskList.map((t) => (
-            <SingleTaskList key={t.id} singleTaskList={t} />
+            <SingleTaskList key={t?.id} singleTaskList={t} />
           ))}
         </FlipMove>
       )}

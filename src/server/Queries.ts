@@ -37,7 +37,9 @@ import {
   defaultTask,
   defaultTaskList,
   deleteTaskList,
+  saveTask,
   setTaskList,
+  setTaskListTasks,
   updateTaskListTitle,
 } from "../Redux/taskSlice";
 
@@ -399,4 +401,61 @@ export const BE_addTask = async (
   } else {
     toastErr("BE_addTask: no such doc");
   }
+};
+
+export const BE_saveUpdatedTask = async (
+  dispatch: AppDispatch,
+  listId: string,
+  data: taskType,
+  setLoading: setLoadingType
+) => {
+  setLoading(true);
+
+  const { id, title, description } = data;
+
+  if (id) {
+    const taskRef = doc(db, taskListColl, listId, tasksColl, id);
+    await updateDoc(taskRef, { title, description });
+
+    const updatedTask = await getDoc(taskRef);
+    if (updatedTask.exists()) {
+      setLoading(false);
+      dispatch(saveTask({ listId, id: updatedTask.id, ...updatedTask.data() }));
+    } else {
+      toastErr("BE_saveUPdatedTask : task not found");
+    }
+  } else {
+    toastErr("BE_saveTask: id not found");
+  }
+};
+
+// get tasks for task list
+export const BE_getTasksForTaskList = async (
+  dispatch: AppDispatch,
+  listId: string,
+  setLoading: setLoadingType
+) => {
+  setLoading(true);
+  // bet tasks in a single task list
+  const taskRef = collection(db, taskListColl, listId, tasksColl);
+  const tasksSnapShot = await getDocs(taskRef);
+
+  const tasks: taskType[] = [];
+
+  if (!tasksSnapShot.empty) {
+    tasksSnapShot.forEach((task) => {
+      const { title, description } = task.data();
+      tasks.push({
+        id: task.id,
+        title,
+        description,
+        editMode: false,
+        collapsed: true,
+      });
+    });
+  }
+
+  dispatch(setTaskListTasks({ listId, tasks }));
+
+  setLoading(false);
 };

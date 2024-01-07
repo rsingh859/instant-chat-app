@@ -86,18 +86,68 @@ const taskListSlice = createSlice({
 
     deleteTask: () => {},
     collapseTask: (state, action) => {
-      const { listId, taskId } = action.payload;
+      const { listId, id } = action.payload;
       const taskList = state.currentTaskList.find((tl) => tl.id === listId);
       const listIdx = state.currentTaskList.findIndex((tl) => tl.id === listId);
 
       // collaps and uncollapse
       taskList?.tasks?.map((t) => {
-        if (t.id === taskId) {
+        if (t.id === id) {
           t.collapsed = !t.collapsed;
         }
       });
 
       if (taskList) state.currentTaskList[listIdx] = taskList;
+    },
+    taskSwitchEditMode: (state, action) => {
+      const { listId, id, value } = action.payload;
+
+      state.currentTaskList = state.currentTaskList.map((tL) => {
+        if (tL.id === listId) {
+          const updatedT = tL.tasks?.map((t) => {
+            if (t.id === id) {
+              t.editMode = value !== undefined ? value : true;
+            }
+            return t;
+          });
+          tL.tasks = updatedT;
+        }
+
+        return tL;
+      });
+    },
+    saveTask: (state, action) => {
+      const { listId, id, title, description } = action.payload;
+
+      const updatedTaskList = state.currentTaskList.map((tl) => {
+        if (tl.id === listId) {
+          const updatedT = tl.tasks?.map((t) => {
+            if (t.id === id) {
+              t = { ...title, title, description, editMode: false };
+            }
+            return t;
+          });
+
+          tl.tasks = updatedT;
+        }
+        return tl;
+      });
+
+      state.currentTaskList = updatedTaskList;
+    },
+
+    setTaskListTasks: (state, action) => {
+      const { listId, tasks } = action.payload;
+
+      const taskList = state.currentTaskList.map((tL) => {
+        if (tL.id === listId) {
+          tL.tasks = tasks;
+        }
+
+        return tL;
+      });
+
+      state.currentTaskList = taskList;
     },
   },
 });
@@ -110,5 +160,8 @@ export const {
   deleteTaskList,
   addTask,
   collapseTask,
+  taskSwitchEditMode,
+  saveTask,
+  setTaskListTasks,
 } = taskListSlice.actions;
 export default taskListSlice.reducer;

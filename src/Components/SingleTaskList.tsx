@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import Icons from "./Icons";
 import {
   MdAdd,
@@ -12,11 +12,13 @@ import { taskListType } from "../Types";
 import {
   BE_addTask,
   BE_deleteTaskList,
+  BE_getTasksForTaskList,
   BE_updateTaskList,
 } from "../server/Queries";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../Redux/store";
 import { taskListSwitchEditMode } from "../Redux/taskSlice";
+import { TaskListTasksLoader } from "./Loaders";
 
 type Props = {
   singleTaskList: taskListType;
@@ -33,6 +35,12 @@ const SingleTaskList = forwardRef(
     const [updateLoading, setUpdateLoading] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [addTaskLoading, setAddTaskLoading] = useState(false);
+    const [tasksLoading, setTasksLoading] = useState(false);
+
+    useEffect(() => {
+      // get tasks here
+      if (id) BE_getTasksForTaskList(dispatch, id, setTasksLoading);
+    }, []);
 
     const handleSaveTaskListTitle = () => {
       if (id && homeTitle !== title)
@@ -84,7 +92,11 @@ const SingleTaskList = forwardRef(
               <Icons IconName={MdKeyboardArrowDown} />
             </div>
           </div>
-          {id && <Tasks tasks={tasks || []} listId={id} />}
+          {tasksLoading ? (
+            <TaskListTasksLoader />
+          ) : (
+            id && <Tasks tasks={tasks || []} listId={id} />
+          )}
         </div>
         <Icons
           onClick={handleAddTask}
